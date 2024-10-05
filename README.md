@@ -1,6 +1,21 @@
 # capacitor-timer-notification
 
-timer notifcation
+A Capacitor plugin to create a timer notification that will show a notification with a countdown timer.
+
+
+## Usage
+
+Add the following to your `android/app/src/main/AndroidManifest.xml` file:
+
+```xml
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+<service android:name=".TimerService" android:enabled="true" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
+```
+
+
+
 
 ## Install
 
