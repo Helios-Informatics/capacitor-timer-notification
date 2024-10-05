@@ -11,9 +11,45 @@ npx cap sync
 
 ## API
 
-<docgen-index></docgen-index>
+<docgen-index>
+
+* [`startTimer(...)`](#starttimer)
+* [`pauseTimer()`](#pausetimer)
+* [`stopTimer()`](#stoptimer)
+
+</docgen-index>
 
 <docgen-api>
-<!-- run docgen to generate docs from the source -->
-<!-- More info: https://github.com/ionic-team/capacitor-docgen -->
+<!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
+
+### startTimer(...)
+
+```typescript
+startTimer(options: { duration: number; }) => Promise<void>
+```
+
+| Param         | Type                               |
+| ------------- | ---------------------------------- |
+| **`options`** | <code>{ duration: number; }</code> |
+
+--------------------
+
+
+### pauseTimer()
+
+```typescript
+pauseTimer() => Promise<void>
+```
+
+--------------------
+
+
+### stopTimer()
+
+```typescript
+stopTimer() => Promise<void>
+```
+
+--------------------
+
 </docgen-api>

@@ -1,3 +1,5 @@
 export interface TimerNotificationPlugin {
-  echo(options: { value: string }): Promise<{ value: string }>;
+  startTimer(options: { duration: number }): Promise<void>;
+  pauseTimer(): Promise<void>;
+  stopTimer(): Promise<void>;
 }
