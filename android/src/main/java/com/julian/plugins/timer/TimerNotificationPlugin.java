@@ -13,9 +13,17 @@ public class TimerNotificationPlugin extends Plugin {
     public void startTimer(PluginCall call) {
         Intent serviceIntent = new Intent(getContext(), TimerService.class);
         serviceIntent.setAction("START_TIMER");
+
+        // Pass the duration as an extra
+        int durationInSeconds = call.getInt("duration", 0); // Default to 0 if not passed
+        long duration = (long) durationInSeconds; // Cast to long if you need it as a long
+         // Default to 0 if not passed
+        serviceIntent.putExtra("TIMER_DURATION", duration);
+
         getContext().startService(serviceIntent);
         call.success();
     }
+
 
     @PluginMethod()
     public void pauseTimer(PluginCall call) {
