@@ -38,25 +38,30 @@ public class TimerService extends Service {
             switch (intent.getAction()) {
                 case "START_TIMER":
                     duration = intent.getLongExtra("TIMER_DURATION", 0); // Get the duration
-
+    
                     if (isPaused) {
-                        startTime = System.currentTimeMillis() - pausedAt;
+                        // When resuming, adjust startTime based on pausedAt (total paused duration)
+                        startTime += (System.currentTimeMillis() - pausedAt);
                         isPaused = false;
                     } else {
                         startTime = System.currentTimeMillis();
                     }
-
+    
                     Notification notification = createNotification(duration, "Starting");
                     startForeground(NOTIFICATION_ID, notification);
-
+    
                     handler.post(updateNotificationTask);
                     break;
+    
                 case "PAUSE_TIMER":
                     isPaused = true;
-                    pausedAt = System.currentTimeMillis() - startTime;
+                    // Store the time when the pause occurred
+                    pausedAt = System.currentTimeMillis();
                     handler.removeCallbacks(updateNotificationTask);
-                    updateNotification(duration - pausedAt / 1000, "Paused"); // Show remaining time when paused
+                    // Calculate remaining time and update notification with correct remaining time
+                    updateNotification((duration - ((pausedAt - startTime) / 1000)), "Paused");
                     break;
+    
                 case "STOP_TIMER":
                     handler.removeCallbacks(updateNotificationTask);
                     stopForeground(true); // Stop the foreground service and remove notification
@@ -66,6 +71,7 @@ public class TimerService extends Service {
         }
         return START_STICKY;
     }
+    
 
     private void createNotificationChannel() {
         // Create the NotificationChannel for Android 8.0 and above
