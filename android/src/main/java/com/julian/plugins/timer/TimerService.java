@@ -88,7 +88,7 @@ public class TimerService extends Service {
     private Notification createNotification(long remainingTime, String statusText) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Timer Running")
-            .setContentText(statusText + ": " + remainingTime + " seconds")
+            .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
             .setSmallIcon(R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -98,6 +98,12 @@ public class TimerService extends Service {
             .setDefaults(0);
     
         return builder.build();
+    }
+
+    private String convertSecondsToMS(long seconds) {
+        long minutes = seconds / 60;
+        long remainingSeconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, remainingSeconds);
     }
 
     private PendingIntent getPendingIntent(String action) {
