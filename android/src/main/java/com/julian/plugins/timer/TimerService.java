@@ -7,38 +7,31 @@ import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import android.R;
+import android.app.PendingIntent;
 
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
     private NotificationManager notificationManager;
 
-    private static final String TAG = "TimerService"; // For logging
-
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
-        Log.d(TAG, "Service created");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getAction() != null) {
-            Log.d(TAG, "onStartCommand called with action: " + intent.getAction());
-
             switch (intent.getAction()) {
                 case "START_TIMER":
                     long duration = intent.getLongExtra("TIMER_DURATION", 0);
-                    Log.d(TAG, "Starting timer with duration: " + duration);
-                    Notification notification = createNotification(duration, "Starting");
+                    Notification notification = createNotification(duration, "Running");
                     startForeground(NOTIFICATION_ID, notification);
                     break;
 
@@ -49,7 +42,6 @@ public class TimerService extends Service {
                     break;
 
                 case "STOP_TIMER":
-                    Log.d(TAG, "Stopping timer and removing notification");
                     stopForeground(true);
                     stopSelf();
                     break;
@@ -67,12 +59,25 @@ public class TimerService extends Service {
     }
 
     private Notification createNotification(long remainingTime, String statusText) {
+        // Create an intent for start/pause
+        Intent startPauseIntent = new Intent(this, TimerService.class);
+        startPauseIntent.setAction("PAUSE_TIMER");
+        PendingIntent pausePendingIntent = PendingIntent.getService(this, 0, startPauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Create an intent for stop
+        Intent stopIntent = new Intent(this, TimerService.class);
+        stopIntent.setAction("STOP_TIMER");
+        PendingIntent stopPendingIntent = PendingIntent.getService(this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Build notification
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Timer Running")
             .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
             .setSmallIcon(R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .addAction(new NotificationCompat.Action(R.drawable.ic_media_play, "Pause", pausePendingIntent))
+            .addAction(new NotificationCompat.Action(R.drawable.ic_media_pause, "Stop", stopPendingIntent))
             .setDefaults(0)
             .build();
     }

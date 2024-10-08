@@ -5,9 +5,14 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData;
 
 @CapacitorPlugin(name = "TimerNotification")
 public class TimerNotificationPlugin extends Plugin {
+
+    // LiveData to communicate with Vue
+    private MutableLiveData<String> buttonClicked = new MutableLiveData<>();
 
     @PluginMethod()
     public void startTimer(PluginCall call) {
@@ -37,5 +42,14 @@ public class TimerNotificationPlugin extends Plugin {
         serviceIntent.setAction("STOP_TIMER");
         getContext().startService(serviceIntent);
         call.success();
+    }
+
+    public LiveData<String> getButtonClicked() {
+        return buttonClicked;
+    }
+
+    // Method to notify button clicked
+    public void notifyButtonClicked(String action) {
+        buttonClicked.postValue(action);
     }
 }
