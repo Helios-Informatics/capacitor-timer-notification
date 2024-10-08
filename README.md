@@ -1,18 +1,20 @@
-# capacitor-timer-notification
+## capacitor-timer-notification
 
-A Capacitor plugin to create a timer notification that will show a notification with a countdown timer.
-
+A Capacitor plugin to create a timer notification that displays a countdown timer in the notification bar.
 
 ## Usage
 
-Add the following to your `android/app/src/main/AndroidManifest.xml` file:
+Add the following to your `android/app/src/main/AndroidManifest.xml` file to declare the necessary permissions and service:
 
-```xml
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+````xml
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-<service android:name=".TimerService" android:enabled="true" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
-```
+<service
+  android:name=".TimerService"
+  android:enabled="true"
+  android:exported="false"
+  android:foregroundServiceType="mediaPlayback"/>
 
 
 
@@ -22,14 +24,14 @@ Add the following to your `android/app/src/main/AndroidManifest.xml` file:
 ```bash
 npm install capacitor-timer-notification
 npx cap sync
-```
+````
 
 ## API
 
 <docgen-index>
 
 * [`startTimer(...)`](#starttimer)
-* [`pauseTimer()`](#pausetimer)
+* [`updateNotification(...)`](#updatenotification)
 * [`stopTimer()`](#stoptimer)
 
 </docgen-index>
@@ -50,11 +52,15 @@ startTimer(options: { duration: number; }) => Promise<void>
 --------------------
 
 
-### pauseTimer()
+### updateNotification(...)
 
 ```typescript
-pauseTimer() => Promise<void>
+updateNotification(options: { duration: number; statusText: string; }) => Promise<void>
 ```
+
+| Param         | Type                                                   |
+| ------------- | ------------------------------------------------------ |
+| **`options`** | <code>{ duration: number; statusText: string; }</code> |
 
 --------------------
 

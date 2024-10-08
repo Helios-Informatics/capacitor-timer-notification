@@ -6,29 +6,27 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-
 @CapacitorPlugin(name = "TimerNotification")
 public class TimerNotificationPlugin extends Plugin {
+
     @PluginMethod()
     public void startTimer(PluginCall call) {
         Intent serviceIntent = new Intent(getContext(), TimerService.class);
         serviceIntent.setAction("START_TIMER");
-
-        // Pass the duration as an extra
-        int durationInSeconds = call.getInt("duration", 0); // Default to 0 if not passed
-        long duration = (long) durationInSeconds; // Cast to long if you need it as a long
-         // Default to 0 if not passed
+        long duration = (long) call.getInt("duration", 0);
         serviceIntent.putExtra("TIMER_DURATION", duration);
-
         getContext().startService(serviceIntent);
         call.success();
     }
 
-
     @PluginMethod()
-    public void pauseTimer(PluginCall call) {
+    public void updateNotification(PluginCall call) {
         Intent serviceIntent = new Intent(getContext(), TimerService.class);
-        serviceIntent.setAction("PAUSE_TIMER");
+        serviceIntent.setAction("UPDATE_NOTIFICATION");
+        long remainingTime = (long) call.getInt("duration", 0);
+        String statusText = call.getString("statusText", "Running");
+        serviceIntent.putExtra("TIMER_DURATION", remainingTime);
+        serviceIntent.putExtra("STATUS_TEXT", statusText);
         getContext().startService(serviceIntent);
         call.success();
     }

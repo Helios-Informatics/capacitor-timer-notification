@@ -1,9 +1,7 @@
 import { registerPlugin } from '@capacitor/core';
-import type { TimerNotificationPlugin } from './definitions';
+import { TimerNotificationPlugin } from './definitions';
 
-const TimerNotification = registerPlugin<TimerNotificationPlugin>('TimerNotification', {
-  web: () => import('./web').then((m) => new m.TimerNotificationWeb()),
-});
+const TimerNotification = registerPlugin<TimerNotificationPlugin>('TimerNotification');
 
 export * from './definitions';
 export { TimerNotification };

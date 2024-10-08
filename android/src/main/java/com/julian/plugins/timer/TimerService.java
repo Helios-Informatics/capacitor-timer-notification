@@ -4,12 +4,12 @@ import android.app.Service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationChannel;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import android.R;
@@ -18,132 +18,74 @@ public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
     private NotificationManager notificationManager;
-    private Handler handler = new Handler();
-    private long startTime;
-    private long elapsedTime = 0;
-    private boolean isPaused = false;
-    private long pausedAt = 0;
-    private long duration; // Declare duration as a class member
+
+    private static final String TAG = "TimerService"; // For logging
 
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        createNotificationChannel();  // Create the notification channel when the service is created
+        createNotificationChannel();
+        Log.d(TAG, "Service created");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getAction() != null) {
+            Log.d(TAG, "onStartCommand called with action: " + intent.getAction());
+
             switch (intent.getAction()) {
                 case "START_TIMER":
-                    duration = intent.getLongExtra("TIMER_DURATION", 0); // Get the duration
-    
-                    if (isPaused) {
-                        // When resuming, adjust startTime based on pausedAt (total paused duration)
-                        startTime += (System.currentTimeMillis() - pausedAt);
-                        isPaused = false;
-                    } else {
-                        startTime = System.currentTimeMillis();
-                    }
-    
+                    long duration = intent.getLongExtra("TIMER_DURATION", 0);
+                    Log.d(TAG, "Starting timer with duration: " + duration);
                     Notification notification = createNotification(duration, "Starting");
                     startForeground(NOTIFICATION_ID, notification);
-    
-                    handler.post(updateNotificationTask);
                     break;
-    
-                case "PAUSE_TIMER":
-                    isPaused = true;
-                    // Store the time when the pause occurred
-                    pausedAt = System.currentTimeMillis();
-                    handler.removeCallbacks(updateNotificationTask);
-                    // Calculate remaining time and update notification with correct remaining time
-                    updateNotification((duration - ((pausedAt - startTime) / 1000)), "Paused");
+
+                case "UPDATE_NOTIFICATION":
+                    long remainingTime = intent.getLongExtra("TIMER_DURATION", 0);
+                    String statusText = intent.getStringExtra("STATUS_TEXT");
+                    updateNotification(remainingTime, statusText);
                     break;
-    
+
                 case "STOP_TIMER":
-                    handler.removeCallbacks(updateNotificationTask);
-                    stopForeground(true); // Stop the foreground service and remove notification
+                    Log.d(TAG, "Stopping timer and removing notification");
+                    stopForeground(true);
                     stopSelf();
                     break;
             }
         }
         return START_STICKY;
     }
-    
 
     private void createNotificationChannel() {
-        // Create the NotificationChannel for Android 8.0 and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelName = "Timer Notifications";
-            String channelDescription = "Channel for timer updates";
-            int importance = NotificationManager.IMPORTANCE_NONE;
-
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, importance);
-            channel.setDescription(channelDescription);
-            channel.setShowBadge(false);  // Disable the notification badge
-            channel.setSound(null, null); // Disable the notification sound
-
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-            }
+            NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID, "Timer Notifications", NotificationManager.IMPORTANCE_LOW);
+            notificationManager.createNotificationChannel(channel);
         }
     }
 
     private Notification createNotification(long remainingTime, String statusText) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Timer Running")
             .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
             .setSmallIcon(R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setColor(0xff000000)
-            .setColorized(true)
-            .setSound(null)
-            .setDefaults(0);
-    
-        return builder.build();
+            .setDefaults(0)
+            .build();
+    }
+
+    private void updateNotification(long remainingTime, String statusText) {
+        Notification notification = createNotification(remainingTime, statusText);
+        notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     private String convertSecondsToMS(long seconds) {
         long minutes = seconds / 60;
         long remainingSeconds = seconds % 60;
         return String.format("%02d:%02d", minutes, remainingSeconds);
-    }
-
-    private PendingIntent getPendingIntent(String action) {
-        Intent intent = new Intent(this, TimerService.class);
-        intent.setAction(action);
-        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    private Runnable updateNotificationTask = new Runnable() {
-       @Override
-       public void run() {
-           long elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
-           long remainingTime = duration - elapsedTime;
-
-           if (remainingTime <= 0) {
-               remainingTime = 0;
-               // Optional: Stop timer automatically when it runs out
-               stopSelf();
-           }
-
-           updateNotification(remainingTime, "Remaining");
-           handler.postDelayed(this, 1000);
-       }
-    };
-       
-    private void updateNotification(long elapsedTime, String statusText) {
-        Notification notification = createNotification(elapsedTime, statusText);
-        notificationManager.notify(NOTIFICATION_ID, notification);
-    }
-
-    @Override
-    public void onDestroy() {
-        handler.removeCallbacks(updateNotificationTask);
-        super.onDestroy();
     }
 
     @Nullable

@@ -1,19 +1,19 @@
 import { WebPlugin } from '@capacitor/core';
-import type { TimerNotificationPlugin } from './definitions';
+import { TimerNotificationPlugin } from './definitions';
 
 export class TimerNotificationWeb extends WebPlugin implements TimerNotificationPlugin {
-  async startTimer(): Promise<void> {
-    console.log('Timer started');
-    // Implement start logic or keep it as a stub for now
+  async startTimer(options: { duration: number }): Promise<void> {
+    console.log(`Starting timer for ${options.duration} seconds`);
   }
 
-  async pauseTimer(): Promise<void> {
-    console.log('Timer paused');
-    // Implement pause logic or keep it as a stub for now
+  async updateNotification(options: { duration: number; statusText: string }): Promise<void> {
+    console.log(`Updating notification: ${options.statusText} with ${options.duration} seconds remaining`);
   }
 
   async stopTimer(): Promise<void> {
-    console.log('Timer stopped');
-    // Implement stop logic or keep it as a stub for now
+    console.log('Stopping timer and removing notification');
   }
 }
+
+const TimerNotification = new TimerNotificationWeb();
+export { TimerNotification };
