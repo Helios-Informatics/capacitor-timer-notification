@@ -2,6 +2,8 @@
 
 A Capacitor plugin to create a timer notification that displays a countdown timer in the notification bar.
 
+Stable Version is 0.24!!
+
 ## Usage
 
 Add the following to your `android/app/src/main/AndroidManifest.xml` file to declare the necessary permissions and service:
