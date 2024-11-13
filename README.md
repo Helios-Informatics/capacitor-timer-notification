@@ -32,7 +32,7 @@ npx cap sync
 
 * [`startTimer(...)`](#starttimer)
 * [`updateNotification(...)`](#updatenotification)
-* [`stopTimer()`](#stoptimer)
+* [`stopTimer(...)`](#stoptimer)
 
 </docgen-index>
 
@@ -65,11 +65,15 @@ updateNotification(options: { duration: number; statusText: string; }) => Promis
 --------------------
 
 
-### stopTimer()
+### stopTimer(...)
 
 ```typescript
-stopTimer() => Promise<void>
+stopTimer(options: { playSound?: boolean; }) => Promise<void>
 ```
+
+| Param         | Type                                  |
+| ------------- | ------------------------------------- |
+| **`options`** | <code>{ playSound?: boolean; }</code> |
 
 --------------------
 
