@@ -35,6 +35,10 @@ public class TimerNotificationPlugin extends Plugin {
     public void stopTimer(PluginCall call) {
         Intent serviceIntent = new Intent(getContext(), TimerService.class);
         serviceIntent.setAction("STOP_TIMER");
+        
+        boolean playSound = call.getBoolean("playSound", false);
+        serviceIntent.putExtra("PLAY_SOUND", playSound);
+
         getContext().startService(serviceIntent);
         call.success();
     }

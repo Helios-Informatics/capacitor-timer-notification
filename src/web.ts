@@ -10,8 +10,8 @@ export class TimerNotificationWeb extends WebPlugin implements TimerNotification
     console.log(`Updating notification: ${options.statusText} with ${options.duration} seconds remaining`);
   }
 
-  async stopTimer(): Promise<void> {
-    console.log('Stopping timer and removing notification');
+  async stopTimer(options: { playSound?: boolean } = { playSound: false }): Promise<void> {
+    console.log(`Stopping timer and removing notification. Play sound: ${options.playSound}`);
   }
 }
 

@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -18,8 +20,7 @@ public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
     private NotificationManager notificationManager;
-
-    private static final String TAG = "TimerService"; // For logging
+    private static final String TAG = "TimerService";
 
     @Override
     public void onCreate() {
@@ -50,6 +51,10 @@ public class TimerService extends Service {
 
                 case "STOP_TIMER":
                     Log.d(TAG, "Stopping timer and removing notification");
+                    boolean playSound = intent.getBooleanExtra("PLAY_SOUND", false);
+                    if (playSound) {
+                        playStopSound();
+                    }
                     stopForeground(true);
                     stopSelf();
                     break;
@@ -80,6 +85,24 @@ public class TimerService extends Service {
     private void updateNotification(long remainingTime, String statusText) {
         Notification notification = createNotification(remainingTime, statusText);
         notificationManager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void playStopSound() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.timerRunoutSound);
+
+        if (mediaPlayer != null) {
+            audioManager.requestAudioFocus(focusChange -> {
+                if (focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT) {
+                    mediaPlayer.start();
+                }
+            }, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                mediaPlayer.release();
+                audioManager.abandonAudioFocus(null);
+            });
+        }
     }
 
     private String convertSecondsToMS(long seconds) {
