@@ -10,19 +10,34 @@ import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+<<<<<<< Updated upstream
 import android.R;
 import android.app.PendingIntent;
+=======
+>>>>>>> Stashed changes
 
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
     private NotificationManager notificationManager;
+<<<<<<< Updated upstream
+=======
+    private long remainingTime;
+    private Handler timerHandler;
+    private Runnable timerRunnable;
+
+    private static TimerService instance;
+>>>>>>> Stashed changes
 
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
+<<<<<<< Updated upstream
+=======
+        instance = this;
+>>>>>>> Stashed changes
     }
 
     @Override
@@ -30,6 +45,7 @@ public class TimerService extends Service {
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case "START_TIMER":
+<<<<<<< Updated upstream
                     long duration = intent.getLongExtra("TIMER_DURATION", 0);
                     Notification notification = createNotification(duration, "Running");
                     startForeground(NOTIFICATION_ID, notification);
@@ -44,16 +60,51 @@ public class TimerService extends Service {
                 case "STOP_TIMER":
                     stopForeground(true);
                     stopSelf();
+=======
+                    remainingTime = intent.getLongExtra("TIMER_DURATION", 0);
+                    startTimer();
+                    break;
+
+                case "STOP_TIMER":
+                    stopTimer();
+>>>>>>> Stashed changes
                     break;
             }
         }
         return START_STICKY;
     }
 
+    private void startTimer() {
+        timerHandler = new Handler();
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (remainingTime > 0) {
+                    updateNotification();
+                    remainingTime--;
+                    timerHandler.postDelayed(this, 1000);  // Update every second
+                } else {
+                    stopTimer();
+                }
+            }
+        };
+        timerHandler.post(timerRunnable);
+        Notification notification = createNotification(remainingTime, "Running");
+        startForeground(NOTIFICATION_ID, notification);
+    }
+
+    private void stopTimer() {
+        if (timerHandler != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
+        stopForeground(true);
+        stopSelf();
+    }
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID, "Timer Notifications", NotificationManager.IMPORTANCE_LOW);
+                    CHANNEL_ID, "Timer Notifications", NotificationManager.IMPORTANCE_LOW);
             notificationManager.createNotificationChannel(channel);
         }
     }
@@ -71,6 +122,7 @@ public class TimerService extends Service {
 
         // Build notification
         return new NotificationCompat.Builder(this, CHANNEL_ID)
+<<<<<<< Updated upstream
             .setContentTitle("Timer Running")
             .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
             .setSmallIcon(R.drawable.ic_lock_idle_alarm)
@@ -80,10 +132,19 @@ public class TimerService extends Service {
             .addAction(new NotificationCompat.Action(R.drawable.ic_media_pause, "Stop", stopPendingIntent))
             .setDefaults(0)
             .build();
+=======
+                .setContentTitle("Timer Running")
+                .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
+                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(0)
+                .build();
+>>>>>>> Stashed changes
     }
 
-    private void updateNotification(long remainingTime, String statusText) {
-        Notification notification = createNotification(remainingTime, statusText);
+    private void updateNotification() {
+        Notification notification = createNotification(remainingTime, "Running");
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
@@ -91,6 +152,15 @@ public class TimerService extends Service {
         long minutes = seconds / 60;
         long remainingSeconds = seconds % 60;
         return String.format("%02d:%02d", minutes, remainingSeconds);
+    }
+
+    // Method to retrieve the remaining time from the service
+    public static TimerService getInstance() {
+        return instance;
+    }
+
+    public long getRemainingTime() {
+        return remainingTime;
     }
 
     @Nullable

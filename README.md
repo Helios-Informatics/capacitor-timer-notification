@@ -33,8 +33,13 @@ npx cap sync
 <docgen-index>
 
 * [`startTimer(...)`](#starttimer)
+<<<<<<< Updated upstream
 * [`updateNotification(...)`](#updatenotification)
 * [`stopTimer()`](#stoptimer)
+=======
+* [`stopTimer()`](#stoptimer)
+* [`getRemainingTime()`](#getremainingtime)
+>>>>>>> Stashed changes
 
 </docgen-index>
 
@@ -54,25 +59,32 @@ startTimer(options: { duration: number; }) => Promise<void>
 --------------------
 
 
-### updateNotification(...)
-
-```typescript
-updateNotification(options: { duration: number; statusText: string; }) => Promise<void>
-```
-
-| Param         | Type                                                   |
-| ------------- | ------------------------------------------------------ |
-| **`options`** | <code>{ duration: number; statusText: string; }</code> |
-
---------------------
-
-
 ### stopTimer()
 
 ```typescript
 stopTimer() => Promise<void>
 ```
 
+--------------------
+
+
+<<<<<<< Updated upstream
+### stopTimer()
+
+```typescript
+stopTimer() => Promise<void>
+```
+
+=======
+### getRemainingTime()
+
+```typescript
+getRemainingTime() => Promise<{ remainingTime: number; }>
+```
+
+**Returns:** <code>Promise&lt;{ remainingTime: number; }&gt;</code>
+
+>>>>>>> Stashed changes
 --------------------
 
 </docgen-api>

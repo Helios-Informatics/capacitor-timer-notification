@@ -5,8 +5,13 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+<<<<<<< Updated upstream
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.LiveData;
+=======
+import com.getcapacitor.JSObject;
+
+>>>>>>> Stashed changes
 
 @CapacitorPlugin(name = "TimerNotification")
 public class TimerNotificationPlugin extends Plugin {
@@ -16,22 +21,10 @@ public class TimerNotificationPlugin extends Plugin {
 
     @PluginMethod()
     public void startTimer(PluginCall call) {
+        long duration = (long) call.getInt("duration", 0);
         Intent serviceIntent = new Intent(getContext(), TimerService.class);
         serviceIntent.setAction("START_TIMER");
-        long duration = (long) call.getInt("duration", 0);
         serviceIntent.putExtra("TIMER_DURATION", duration);
-        getContext().startService(serviceIntent);
-        call.success();
-    }
-
-    @PluginMethod()
-    public void updateNotification(PluginCall call) {
-        Intent serviceIntent = new Intent(getContext(), TimerService.class);
-        serviceIntent.setAction("UPDATE_NOTIFICATION");
-        long remainingTime = (long) call.getInt("duration", 0);
-        String statusText = call.getString("statusText", "Running");
-        serviceIntent.putExtra("TIMER_DURATION", remainingTime);
-        serviceIntent.putExtra("STATUS_TEXT", statusText);
         getContext().startService(serviceIntent);
         call.success();
     }
@@ -44,6 +37,7 @@ public class TimerNotificationPlugin extends Plugin {
         call.success();
     }
 
+<<<<<<< Updated upstream
     public LiveData<String> getButtonClicked() {
         return buttonClicked;
     }
@@ -51,5 +45,19 @@ public class TimerNotificationPlugin extends Plugin {
     // Method to notify button clicked
     public void notifyButtonClicked(String action) {
         buttonClicked.postValue(action);
+=======
+    // Method to retrieve the remaining time
+    @PluginMethod()
+    public void getRemainingTime(PluginCall call) {
+        TimerService timerService = TimerService.getInstance();
+        if (timerService != null) {
+            long remainingTime = timerService.getRemainingTime();
+            JSObject ret = new JSObject();
+            ret.put("remainingTime", remainingTime); // Add the long value to JSObject
+            call.resolve(ret); // Return the JSObject
+        } else {
+            call.reject("TimerService not running");
+        }
+>>>>>>> Stashed changes
     }
 }
