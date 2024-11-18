@@ -1,3 +1,12 @@
+package simple.workout.log;
+
+import android.content.Intent;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.JSObject;
+
 import androidx.lifecycle.Observer;
 
 @CapacitorPlugin(name = "TimerNotification")
