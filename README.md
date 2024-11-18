@@ -33,13 +33,12 @@ npx cap sync
 <docgen-index>
 
 * [`startTimer(...)`](#starttimer)
-<<<<<<< Updated upstream
-* [`updateNotification(...)`](#updatenotification)
 * [`stopTimer()`](#stoptimer)
-=======
-* [`stopTimer()`](#stoptimer)
-* [`getRemainingTime()`](#getremainingtime)
->>>>>>> Stashed changes
+* [`pauseTimer()`](#pausetimer)
+* [`resumeTimer()`](#resumetimer)
+* [`addListener('remainingTimeUpdate', ...)`](#addlistenerremainingtimeupdate-)
+* [`removeAllListeners(...)`](#removealllisteners)
+* [Interfaces](#interfaces)
 
 </docgen-index>
 
@@ -52,9 +51,11 @@ npx cap sync
 startTimer(options: { duration: number; }) => Promise<void>
 ```
 
-| Param         | Type                               |
-| ------------- | ---------------------------------- |
-| **`options`** | <code>{ duration: number; }</code> |
+Starts the timer with the given duration in seconds.
+
+| Param         | Type                               | Description                                    |
+| ------------- | ---------------------------------- | ---------------------------------------------- |
+| **`options`** | <code>{ duration: number; }</code> | - Object containing the duration of the timer. |
 
 --------------------
 
@@ -65,26 +66,73 @@ startTimer(options: { duration: number; }) => Promise<void>
 stopTimer() => Promise<void>
 ```
 
+Stops the currently running timer.
+
 --------------------
 
 
-<<<<<<< Updated upstream
-### stopTimer()
+### pauseTimer()
 
 ```typescript
-stopTimer() => Promise<void>
+pauseTimer() => Promise<void>
 ```
 
-=======
-### getRemainingTime()
+Pauses the currently running timer.
 
-```typescript
-getRemainingTime() => Promise<{ remainingTime: number; }>
-```
-
-**Returns:** <code>Promise&lt;{ remainingTime: number; }&gt;</code>
-
->>>>>>> Stashed changes
 --------------------
+
+
+### resumeTimer()
+
+```typescript
+resumeTimer() => Promise<void>
+```
+
+Resumes the paused timer.
+
+--------------------
+
+
+### addListener('remainingTimeUpdate', ...)
+
+```typescript
+addListener(eventName: 'remainingTimeUpdate', listenerFunc: (data: { remainingTime: number; }) => void) => Promise<PluginListenerHandle>
+```
+
+Listens for updates on the remaining time of the timer.
+
+| Param              | Type                                                       | Description                                           |
+| ------------------ | ---------------------------------------------------------- | ----------------------------------------------------- |
+| **`eventName`**    | <code>'remainingTimeUpdate'</code>                         | - The name of the event, e.g., "remainingTimeUpdate". |
+| **`listenerFunc`** | <code>(data: { remainingTime: number; }) =&gt; void</code> | - Callback function that receives the remaining time. |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+--------------------
+
+
+### removeAllListeners(...)
+
+```typescript
+removeAllListeners(eventName: string) => Promise<void>
+```
+
+Removes all listeners for a given event.
+
+| Param           | Type                | Description                                      |
+| --------------- | ------------------- | ------------------------------------------------ |
+| **`eventName`** | <code>string</code> | - The name of the event to remove listeners for. |
+
+--------------------
+
+
+### Interfaces
+
+
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
 
 </docgen-api>

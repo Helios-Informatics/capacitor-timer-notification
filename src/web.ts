@@ -1,27 +1,30 @@
-import { WebPlugin } from "@capacitor/core";
-import { TimerNotificationPlugin } from "./definitions";
+import { WebPlugin } from '@capacitor/core';
+import type { TimerNotificationPlugin } from './definitions';
 
-export class TimerNotificationWeb
-  extends WebPlugin
-  implements TimerNotificationPlugin
-{
-  constructor() {
-    super({
-      name: "TimerNotification",
-      platforms: ["web"],
-    });
-  }
-
+export class TimerNotificationWeb extends WebPlugin implements TimerNotificationPlugin {
   async startTimer(options: { duration: number }): Promise<void> {
-    console.log(`Timer started for ${options.duration} seconds on Web`);
+    console.log('Timer started with duration:', options.duration);
   }
 
   async stopTimer(): Promise<void> {
-    console.log("Timer stopped on Web");
+    console.log('Timer stopped');
+  }
+
+  async pauseTimer(): Promise<void> {
+    console.log('Timer paused');
+  }
+
+  async resumeTimer(): Promise<void> {
+    console.log('Timer resumed');
   }
 
   async getRemainingTime(): Promise<{ remainingTime: number }> {
-    console.log("Returning remaining time on Web");
-    return { remainingTime: 0 }; // Web doesn't support actual timers
+    console.log('Fetching remaining time...');
+    return { remainingTime: 0 }; // Simulate a default remaining time
+  }
+
+  removeAllListeners(): Promise<void> {
+    console.log('All listeners removed');
+    return super.removeAllListeners(); // Call the base class's implementation
   }
 }

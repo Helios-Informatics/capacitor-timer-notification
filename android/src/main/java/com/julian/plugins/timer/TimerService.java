@@ -1,16 +1,5 @@
-package simple.workout.log;
-
-import android.app.Service;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.NotificationChannel;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Handler;
-import android.os.IBinder;
-import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
@@ -19,8 +8,10 @@ public class TimerService extends Service {
     private long remainingTime;
     private Handler timerHandler;
     private Runnable timerRunnable;
+    private boolean isPaused = false;
 
     private static TimerService instance;
+    private static final MutableLiveData<Long> remainingTimeLiveData = new MutableLiveData<>();
 
     @Override
     public void onCreate() {
@@ -41,20 +32,31 @@ public class TimerService extends Service {
                 case "STOP_TIMER":
                     stopTimer();
                     break;
+                case "PAUSE_TIMER":
+                    pauseTimer();
+                    break;
+                case "RESUME_TIMER":
+                    resumeTimer();
+                    break;
             }
         }
         return START_STICKY;
     }
 
     private void startTimer() {
+        if (timerHandler != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
+        isPaused = false;
         timerHandler = new Handler();
         timerRunnable = new Runnable() {
             @Override
             public void run() {
-                if (remainingTime > 0) {
+                if (remainingTime > 0 && !isPaused) {
+                    remainingTimeLiveData.postValue(remainingTime); // Emit remaining time
                     updateNotification();
                     remainingTime--;
-                    timerHandler.postDelayed(this, 1000);  // Update every second
+                    timerHandler.postDelayed(this, 1000); // Update every second
                 } else {
                     stopTimer();
                 }
@@ -66,10 +68,23 @@ public class TimerService extends Service {
         startForeground(NOTIFICATION_ID, notification);
     }
 
+    private void pauseTimer() {
+        isPaused = true;
+        if (timerHandler != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
+    }
+
+    private void resumeTimer() {
+        isPaused = false;
+        startTimer();
+    }
+
     private void stopTimer() {
         if (timerHandler != null) {
             timerHandler.removeCallbacks(timerRunnable);
         }
+        remainingTimeLiveData.postValue(0L); // Notify subscribers timer is stopped
         stopForeground(true);
         stopSelf();
     }
@@ -104,10 +119,12 @@ public class TimerService extends Service {
         return String.format("%02d:%02d", minutes, remainingSeconds);
     }
 
-    // Method to retrieve the remaining time from the service
-
     public static TimerService getInstance() {
         return instance;
+    }
+
+    public static LiveData<Long> getRemainingTimeLiveData() {
+        return remainingTimeLiveData;
     }
 
     public long getRemainingTime() {
