@@ -7,37 +7,27 @@ import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-<<<<<<< Updated upstream
-import android.R;
-import android.app.PendingIntent;
-=======
->>>>>>> Stashed changes
 
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
     private NotificationManager notificationManager;
-<<<<<<< Updated upstream
-=======
     private long remainingTime;
     private Handler timerHandler;
     private Runnable timerRunnable;
 
     private static TimerService instance;
->>>>>>> Stashed changes
 
     @Override
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
-<<<<<<< Updated upstream
-=======
         instance = this;
->>>>>>> Stashed changes
     }
 
     @Override
@@ -45,29 +35,11 @@ public class TimerService extends Service {
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case "START_TIMER":
-<<<<<<< Updated upstream
-                    long duration = intent.getLongExtra("TIMER_DURATION", 0);
-                    Notification notification = createNotification(duration, "Running");
-                    startForeground(NOTIFICATION_ID, notification);
-                    break;
-
-                case "UPDATE_NOTIFICATION":
-                    long remainingTime = intent.getLongExtra("TIMER_DURATION", 0);
-                    String statusText = intent.getStringExtra("STATUS_TEXT");
-                    updateNotification(remainingTime, statusText);
-                    break;
-
-                case "STOP_TIMER":
-                    stopForeground(true);
-                    stopSelf();
-=======
                     remainingTime = intent.getLongExtra("TIMER_DURATION", 0);
                     startTimer();
                     break;
-
                 case "STOP_TIMER":
                     stopTimer();
->>>>>>> Stashed changes
                     break;
             }
         }
@@ -88,6 +60,7 @@ public class TimerService extends Service {
                 }
             }
         };
+
         timerHandler.post(timerRunnable);
         Notification notification = createNotification(remainingTime, "Running");
         startForeground(NOTIFICATION_ID, notification);
@@ -110,29 +83,7 @@ public class TimerService extends Service {
     }
 
     private Notification createNotification(long remainingTime, String statusText) {
-        // Create an intent for start/pause
-        Intent startPauseIntent = new Intent(this, TimerService.class);
-        startPauseIntent.setAction("PAUSE_TIMER");
-        PendingIntent pausePendingIntent = PendingIntent.getService(this, 0, startPauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Create an intent for stop
-        Intent stopIntent = new Intent(this, TimerService.class);
-        stopIntent.setAction("STOP_TIMER");
-        PendingIntent stopPendingIntent = PendingIntent.getService(this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Build notification
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-<<<<<<< Updated upstream
-            .setContentTitle("Timer Running")
-            .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
-            .setSmallIcon(R.drawable.ic_lock_idle_alarm)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .addAction(new NotificationCompat.Action(R.drawable.ic_media_play, "Pause", pausePendingIntent))
-            .addAction(new NotificationCompat.Action(R.drawable.ic_media_pause, "Stop", stopPendingIntent))
-            .setDefaults(0)
-            .build();
-=======
                 .setContentTitle("Timer Running")
                 .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -140,7 +91,6 @@ public class TimerService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(0)
                 .build();
->>>>>>> Stashed changes
     }
 
     private void updateNotification() {
@@ -155,6 +105,7 @@ public class TimerService extends Service {
     }
 
     // Method to retrieve the remaining time from the service
+
     public static TimerService getInstance() {
         return instance;
     }
