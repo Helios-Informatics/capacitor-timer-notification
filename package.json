@@ -1,6 +1,6 @@
 {
   "name": "capacitor-timer-notification",
-  "version": "0.1.65",
+  "version": "0.1.9",
   "description": "timer notifcation",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
