@@ -27,6 +27,8 @@ import androidx.lifecycle.MutableLiveData;
 import android.media.AudioFocusRequest;
 import android.media.AudioAttributes;
 
+import com.julian.plugins.timer.R;
+
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
     private final String CHANNEL_ID = "timer_channel";
@@ -84,7 +86,7 @@ public class TimerService extends Service {
             public void run() {
                 if (remainingTime > 0 && !isPaused) {
                     remainingTimeLiveData.postValue(remainingTime); // Emit remaining time
-                    updateNotification();
+                    updateNotification("Running");
                     remainingTime--;
                     timerHandler.postDelayed(this, 1000); // Update every second
                 } else {
@@ -101,6 +103,7 @@ public class TimerService extends Service {
 
     private void pauseTimer() {
         isPaused = true;
+        updateNotification("Paused");
         if (timerHandler != null) {
             timerHandler.removeCallbacks(timerRunnable);
         }
@@ -108,6 +111,7 @@ public class TimerService extends Service {
 
     private void resumeTimer() {
         isPaused = false;
+        updateNotification("Running");
         startTimer();
     }
 
@@ -130,17 +134,17 @@ public class TimerService extends Service {
 
     private Notification createNotification(long remainingTime, String statusText) {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Timer Running")
+                .setContentTitle("Timer")
                 .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
-                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setSmallIcon(R.drawable.timer_icon)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(0)
                 .build();
     }
 
-    private void updateNotification() {
-        Notification notification = createNotification(remainingTime, "Running");
+    private void updateNotification(String statusText) {
+        Notification notification = createNotification(remainingTime, statusText);
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
 
@@ -155,7 +159,7 @@ public class TimerService extends Service {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         // Request audio focus for media
-        AudioFocusRequest audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+        AudioFocusRequest audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
                 .setAudioAttributes(new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA) // Treat as media sound
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC) // Music content type
@@ -179,8 +183,8 @@ public class TimerService extends Service {
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC) // Music content type
                         .build());
 
-                mediaPlayer.setDataSource(getApplicationContext(), soundUri);
-                mediaPlayer.prepare();
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.timersound);
+
 
                 // Play the sound
                 mediaPlayer.setOnCompletionListener(mp -> {

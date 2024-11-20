@@ -4,6 +4,8 @@ A Capacitor plugin to create a timer notification that displays a countdown time
 
 ## Usage
 
+Please provide an audio file in the `android/app/src/main/res/raw` directory of your project. The plugin will use this audio file to play a sound when the timer is up.
+
 Add the following to your `android/app/src/main/AndroidManifest.xml` file to declare the necessary permissions and service:
 
 ````xml
