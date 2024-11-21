@@ -159,7 +159,17 @@ public class TimerService extends Service {
                 .setDefaults(0)
                 .addAction(R.drawable.timer_icon, "Stop", stopIntent) // Add Stop button
                 .addAction(R.drawable.timer_icon, actionText, pauseResumeIntent) // Add Pause/Resume button
+                .setContentIntent(getContentIntent())
                 .build();
+    }
+
+    private PendingIntent getContentIntent() {
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (launchIntent != null) {
+            launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            return PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE);
+        }
+        return null;
     }
 
 
