@@ -1,4 +1,4 @@
-package simple.workout.log;
+package com.julian.plugins.timer;
 
 import android.content.Intent;
 import com.getcapacitor.PluginCall;

@@ -1,5 +1,6 @@
-package simple.workout.log;
+package com.julian.plugins.timer;
 
+import android.app.LauncherActivity;
 import android.app.Service;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -10,24 +11,22 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import android.app.PendingIntent;
 
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import java.io.IOException;
-import android.os.Looper;
+import android.os.PowerManager;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import android.media.AudioFocusRequest;
 import android.media.AudioAttributes;
 
-import com.julian.plugins.timer.R;
+import  androidx.appcompat.app.AppCompatActivity;
+
 
 public class TimerService extends Service {
     private final int NOTIFICATION_ID = 1;
@@ -43,15 +42,20 @@ public class TimerService extends Service {
 
     private AudioManager audioManager;
     private MediaPlayer mediaPlayer;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TimerService::WakeLock");
+        wakeLock.acquire(10*60*1000L /*10 minutes*/);  // Keep the CPU awake for 10 minutes
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         createNotificationChannel();
         instance = this;
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE); // AudioManager to control volume
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -107,6 +111,7 @@ public class TimerService extends Service {
         if (timerHandler != null) {
             timerHandler.removeCallbacks(timerRunnable);
         }
+        remainingTimeLiveData.postValue(-1L); // Notify subscribers timer is paused
     }
 
     private void resumeTimer() {
@@ -122,6 +127,9 @@ public class TimerService extends Service {
         remainingTimeLiveData.postValue(0L); // Notify subscribers timer is stopped
         stopForeground(true);
         stopSelf();
+        if(wakeLock.isHeld()){
+            wakeLock.release();
+        }
     }
 
     private void createNotificationChannel() {
@@ -133,6 +141,15 @@ public class TimerService extends Service {
     }
 
     private Notification createNotification(long remainingTime, String statusText) {
+        // Create a stop action
+        PendingIntent stopIntent = PendingIntent.getService(this, 0,
+                new Intent(this, TimerService.class).setAction("STOP_TIMER"), PendingIntent.FLAG_IMMUTABLE);
+
+        // Create a pause/resume action
+        String actionText = isPaused ? "Resume" : "Pause"; // Toggle between "Pause" and "Resume"
+        PendingIntent pauseResumeIntent = PendingIntent.getService(this, 0,
+                new Intent(this, TimerService.class).setAction(isPaused ? "RESUME_TIMER" : "PAUSE_TIMER"), PendingIntent.FLAG_IMMUTABLE);
+
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Timer")
                 .setContentText(statusText + ": " + convertSecondsToMS(remainingTime))
@@ -140,10 +157,13 @@ public class TimerService extends Service {
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setDefaults(0)
+                .addAction(R.drawable.timer_icon, "Stop", stopIntent) // Add Stop button
+                .addAction(R.drawable.timer_icon, actionText, pauseResumeIntent) // Add Pause/Resume button
                 .build();
     }
 
-    private void updateNotification(String statusText) {
+
+        private void updateNotification(String statusText) {
         Notification notification = createNotification(remainingTime, statusText);
         notificationManager.notify(NOTIFICATION_ID, notification);
     }
